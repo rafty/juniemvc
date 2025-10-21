@@ -8,7 +8,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -24,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(BeerController.class)
+@Import(BeerControllerTest.MockConfig.class)
 class BeerControllerTest {
 
     @Autowired
@@ -32,8 +35,16 @@ class BeerControllerTest {
     @Autowired
     ObjectMapper objectMapper;
 
-    @MockBean
+    @Autowired
     BeerService beerService;
+
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        BeerService beerService() {
+            return Mockito.mock(BeerService.class);
+        }
+    }
 
     private Beer sampleBeer(Integer id) {
         return Beer.builder()
