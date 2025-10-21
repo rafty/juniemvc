@@ -104,4 +104,49 @@ class BeerControllerTest {
                 .andExpect(jsonPath("$[0].id", is(1)))
                 .andExpect(jsonPath("$[1].id", is(2)));
     }
+
+    @Test
+    @DisplayName("PUT /api/v1/beer/{id} - update success")
+    void updateBeerSuccess() throws Exception {
+        Beer updated = sampleBeer(5);
+        updated.setBeerName("Updated Lager");
+        Mockito.when(beerService.update(eq(5), any(Beer.class))).thenReturn(Optional.of(updated));
+
+        mockMvc.perform(put("/api/v1/beer/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updated)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(5)))
+                .andExpect(jsonPath("$.beerName", is("Updated Lager")));
+    }
+
+    @Test
+    @DisplayName("PUT /api/v1/beer/{id} - not found")
+    void updateBeerNotFound() throws Exception {
+        Beer payload = sampleBeer(999);
+        Mockito.when(beerService.update(eq(999), any(Beer.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/api/v1/beer/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(payload)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/beer/{id} - delete success")
+    void deleteBeerSuccess() throws Exception {
+        Mockito.when(beerService.delete(eq(7))).thenReturn(true);
+
+        mockMvc.perform(delete("/api/v1/beer/7"))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    @DisplayName("DELETE /api/v1/beer/{id} - not found")
+    void deleteBeerNotFound() throws Exception {
+        Mockito.when(beerService.delete(eq(404))).thenReturn(false);
+
+        mockMvc.perform(delete("/api/v1/beer/404"))
+                .andExpect(status().isNotFound());
+    }
 }
