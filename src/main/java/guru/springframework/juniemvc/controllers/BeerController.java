@@ -36,4 +36,20 @@ public class BeerController {
     public ResponseEntity<List<Beer>> listAll() {
         return ResponseEntity.ok(beerService.listAll());
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Beer> update(@PathVariable Integer id, @RequestBody Beer beer) {
+        return beerService.update(id, beer)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        boolean deleted = beerService.delete(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
 }
