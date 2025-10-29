@@ -1,7 +1,7 @@
 package guru.springframework.juniemvc.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.springframework.juniemvc.entities.Beer;
+import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.services.BeerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -46,8 +46,8 @@ class BeerControllerTest {
         }
     }
 
-    private Beer sampleBeer(Integer id) {
-        return Beer.builder()
+    private BeerDto sampleBeer(Integer id) {
+        return BeerDto.builder()
                 .id(id)
                 .beerName("Test Lager")
                 .beerStyle("LAGER")
@@ -60,8 +60,8 @@ class BeerControllerTest {
     @Test
     @DisplayName("POST /api/v1/beer - create")
     void createBeer() throws Exception {
-        Beer toCreate = sampleBeer(10);
-        Mockito.when(beerService.create(any(Beer.class))).thenReturn(toCreate);
+        BeerDto toCreate = sampleBeer(10);
+        Mockito.when(beerService.create(any(BeerDto.class))).thenReturn(toCreate);
 
         mockMvc.perform(post("/api/v1/beer")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +95,7 @@ class BeerControllerTest {
     @Test
     @DisplayName("GET /api/v1/beer - list all")
     void listAll() throws Exception {
-        List<Beer> beers = Arrays.asList(sampleBeer(1), sampleBeer(2));
+        List<BeerDto> beers = Arrays.asList(sampleBeer(1), sampleBeer(2));
         Mockito.when(beerService.listAll()).thenReturn(beers);
 
         mockMvc.perform(get("/api/v1/beer"))
@@ -108,9 +108,9 @@ class BeerControllerTest {
     @Test
     @DisplayName("PUT /api/v1/beer/{id} - update success")
     void updateBeerSuccess() throws Exception {
-        Beer updated = sampleBeer(5);
+        BeerDto updated = sampleBeer(5);
         updated.setBeerName("Updated Lager");
-        Mockito.when(beerService.update(eq(5), any(Beer.class))).thenReturn(Optional.of(updated));
+        Mockito.when(beerService.update(eq(5), any(BeerDto.class))).thenReturn(Optional.of(updated));
 
         mockMvc.perform(put("/api/v1/beer/5")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,8 +123,8 @@ class BeerControllerTest {
     @Test
     @DisplayName("PUT /api/v1/beer/{id} - not found")
     void updateBeerNotFound() throws Exception {
-        Beer payload = sampleBeer(999);
-        Mockito.when(beerService.update(eq(999), any(Beer.class))).thenReturn(Optional.empty());
+        BeerDto payload = sampleBeer(999);
+        Mockito.when(beerService.update(eq(999), any(BeerDto.class))).thenReturn(Optional.empty());
 
         mockMvc.perform(put("/api/v1/beer/999")
                         .contentType(MediaType.APPLICATION_JSON)
