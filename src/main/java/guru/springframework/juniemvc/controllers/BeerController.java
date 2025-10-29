@@ -1,7 +1,8 @@
 package guru.springframework.juniemvc.controllers;
 
-import guru.springframework.juniemvc.entities.Beer;
+import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.services.BeerService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,35 +12,35 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/beer")
-public class BeerController {
+class BeerController {
 
     private final BeerService beerService;
 
-    public BeerController(BeerService beerService) {
+    BeerController(BeerService beerService) {
         this.beerService = beerService;
     }
 
     @PostMapping
-    public ResponseEntity<Beer> create(@RequestBody Beer beer) {
-        Beer saved = beerService.create(beer);
+    public ResponseEntity<BeerDto> create(@Valid @RequestBody BeerDto beerDto) {
+        BeerDto saved = beerService.create(beerDto);
         return ResponseEntity.created(URI.create("/api/v1/beer/" + saved.getId())).body(saved);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Beer> getById(@PathVariable Integer id) {
+    public ResponseEntity<BeerDto> getById(@PathVariable Integer id) {
         return beerService.getById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
 
     @GetMapping
-    public ResponseEntity<List<Beer>> listAll() {
+    public ResponseEntity<List<BeerDto>> listAll() {
         return ResponseEntity.ok(beerService.listAll());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Beer> update(@PathVariable Integer id, @RequestBody Beer beer) {
-        return beerService.update(id, beer)
+    public ResponseEntity<BeerDto> update(@PathVariable Integer id, @Valid @RequestBody BeerDto beerDto) {
+        return beerService.update(id, beerDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
