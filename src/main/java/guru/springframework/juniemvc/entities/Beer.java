@@ -1,10 +1,6 @@
 package guru.springframework.juniemvc.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Version;
-import jakarta.persistence.Table;
-import jakarta.persistence.Column;
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
@@ -28,19 +24,24 @@ import org.hibernate.annotations.UpdateTimestamp;
 public class Beer {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Version
     private Integer version;
 
+    @Column(length = 100, nullable = false)
     private String beerName;
 
+    @Column(length = 40, nullable = false)
     private String beerStyle;
 
+    @Column(length = 30, unique = true, nullable = false)
     private String upc;
 
     private Integer quantityOnHand;
 
+    @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
     @CreationTimestamp
