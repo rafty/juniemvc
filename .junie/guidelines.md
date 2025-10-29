@@ -1,100 +1,216 @@
-# 新規開発者向けガイドライン（junie mvc）
+# Spring Boot ガイドライン
 
-このドキュメントは、プロジェクト構造と技術スタックの概要、セットアップ、ビルド/実行、テスト、日常作業、ベストプラクティスを簡潔にまとめたものです。迷ったらここを見てください。
+## 1. **Field/Setter Injection より Constructor Injection を優先する**
 
-## 1. プロジェクト概要
-- フレームワーク: Spring Boot 3.5.x（Java 21）
-- ビルド: Maven（mvnw ラッパー同梱）
-- 永続化: Spring Data JPA + H2（ランタイム）、Flyway（マイグレーション）
-- その他: Bean Validation、Lombok、MapStruct
-- メイン機能サンプル: Beer エンティティの CRUD REST API
-  - ベースパス: /api/v1/beer
+* すべての必須依存関係を `final` フィールドとして宣言し、コンストラクタ経由で注入する。
+* コンストラクタが1つしかない場合、`@Autowired` は不要（Spring が自動検出する）。
+* 本番コードでは Field Injection や Setter Injection を避ける。
 
-## 2. ディレクトリ構造（主要）
-- pom.xml: 依存関係・ビルド設定（Java 21、MapStruct、Lombok 等）
-- src/main/java/...: アプリ本体
-  - controllers/BeerController.java: REST エンドポイント
-  - entities/Beer.java: JPA エンティティ
-  - repositories/BeerRepository.java: Spring Data JPA リポジトリ
-  - services/*: サービス層（BeerService / Impl）
-- src/main/resources/application.properties: アプリ設定
-- src/test/java/...: ユニット/スライス/統合テスト
-- mvnw, mvnw.cmd: Maven ラッパー（ローカル Maven 不要）
+**説明:**
 
-## 3. 事前準備
-- 必須: JDK 21（JAVA_HOME 設定推奨）
-- 推奨 IDE: IntelliJ IDEA（Lombok アノテーションの処理を有効化）
-- ネットワーク: 依存取得のため外部 Maven Central にアクセス可能であること
+* 必須依存を `final` フィールドにしてコンストラクタで注入することで、オブジェクトはJava言語の仕組みだけで常に初期化済みの正しい状態になる。フレームワーク固有の初期化に依存しない。
+* Reflection を使った初期化やモックなしでユニットテストが書ける。
+* コンストラクタを見るだけで、そのクラスの依存関係が一目でわかる。
+* Spring Boot の `RestClient.Builder`, `ChatClient.Builder` のような拡張ポイントもコンストラクタインジェクションで柔軟に初期化できる。
 
-## 4. よく使うコマンド（すべてプロジェクトルートで実行）
-- 依存取得＋ビルド（テスト込み）:
-  - macOS/Linux: ./mvnw clean verify
-  - Windows: mvnw.cmd clean verify
-- アプリ起動（開発時）:
-  - ./mvnw spring-boot:run
-- パッケージング（fat jar 作成）:
-  - ./mvnw clean package
-  - 実行: java -jar target/juniemvc-0.0.1-SNAPSHOT.jar
-- テスト実行:
-  - 全テスト: ./mvnw test
-  - テストクラス単体: ./mvnw -Dtest=guru.springframework.juniemvc.controllers.BeerControllerTest test
-  - 1テストメソッドのみ: ./mvnw -Dtest="FQN#methodName" test
+```java
+@Service
+public class OrderService {
+   private final OrderRepository orderRepository;
+   private final RestClient restClient;
 
-## 5. API の動作確認（例）
-- 起動後、以下で確認可能（デフォルトは http://localhost:8080）
-  - POST /api/v1/beer で作成
-  - GET /api/v1/beer/{id} で取得
-  - GET /api/v1/beer で一覧
-  - PUT /api/v1/beer/{id} で更新
-  - DELETE /api/v1/beer/{id} で削除
+   public OrderService(OrderRepository orderRepository, 
+                       RestClient.Builder builder) {
+       this.orderRepository = orderRepository;
+       this.restClient = builder
+               .baseUrl("http://catalog-service.com")
+               .requestInterceptor(new ClientCredentialTokenInterceptor())
+               .build();
+   }
 
-## 6. データベース/マイグレーション
-- デフォルトは H2（インメモリ/ローカル）。本番系設定や Flyway マイグレーションスクリプトは適宜追加してください。
-- Flyway は依存済み。V1__*.sql 等を src/main/resources/db/migration に配置すると起動時に適用されます。
+   //... methods
+}
+```
 
-## 7. コーディングと設計の方針
-- レイヤリング: Controller → Service → Repository の依存方向を維持
-- バリデーション: @Valid / Bean Validation を活用（DTO 導入時は特に有効）
-- 例外/戻り値: 404 等の適切な HTTP ステータスを返す（BeerController 参照）
-- Lombok: @Getter/@Setter/@Builder 等の利用時、IDE の annotation processing を ON
-- MapStruct: マッピングが増えたら interface + @Mapper で定義（processor は pom に設定済み）
+---
 
-## 8. テスト戦略
-- 単体テスト: サービスやコントローラの振る舞いを迅速に検証
-- スライステスト/統合テスト: Spring Boot Test（spring-boot-starter-test 依存あり）
-- 実行コマンドは「4. よく使うコマンド」を参照
-- テスト命名/粒度: 失敗時に原因がわかるように Given-When-Then を意識
+## 2. **Spring Component は可能な限り package-private にする**
 
-## 9. スクリプト/ユーティリティ
-- 専用スクリプトは現時点なし。Maven ラッパー（mvnw）が共通エントリポイント
-- 将来的にスクリプトを追加する場合は scripts/ 配下を作成し、README か本ガイドに追記
+* Controller、`@Configuration` クラス、`@Bean` メソッドなどは、必要がない限り `public` にせず package-private（デフォルト可視性）にする。
 
-## 10. Git 運用とコミット
-- ブランチ: トピックブランチ運用（例: feature/add-xyz, fix/bug-123）
-- コミットメッセージ（例）:
-  - feat: add BeerController CRUD endpoints
-  - fix: handle 404 on beer update when id not found
-  - test: add service tests for beer listing
-  - chore: bump mapstruct to 1.6.3
-- Pull Request: 目的、変更点、テスト観点、動作確認手順を簡潔に記載
+**説明:**
 
-## 11. ベストプラクティス
-- 小さく頻繁にコミット／PR（レビュー容易化）
-- 設計/命名は「意図が伝わること」を最優先
-- ドメインロジックはサービス層へ集約し、Controller は薄く
-- Null 安全・Optional の活用、早期 return で分岐を簡潔に
-- ログは必要最小限・情報価値の高いものに限定
+* package-private にすることで、実装の詳細を他のパッケージから隠し、カプセル化を強化できる。
+* Spring Boot は package-private なクラスも検出・呼び出し可能なので、外部公開が不要なクラスは `public` にしなくてよい。
 
-## 12. トラブルシューティング
-- Java バージョン不一致: java -version が 21 であることを確認
-- 依存解決失敗: ネットワークと Maven Central へのアクセス権を確認、./mvnw -U で更新
-- ポート競合: 8080 が使用中なら、server.port=0 を application.properties に追加して回避
-- Lombok の警告: IntelliJ の「Annotation Processing」を有効化
+---
 
-## 13. 追加リソース
-- Spring Boot Docs: https://docs.spring.io/spring-boot
-- MapStruct: https://mapstruct.org/
-- Lombok: https://projectlombok.org/
-- Flyway: https://flywaydb.org/
+## 3. **Typed Properties を使って設定を整理する**
 
-以上。詳細はソースとテスト（src/test/java）を併読してください。
+* `application.properties` または `.yml` に共通プレフィックスを持つ設定をまとめる。
+* `@ConfigurationProperties` クラスにバインドし、バリデーションアノテーションを付与して不正設定を即検知する。
+* 環境ごとの設定は Profiles よりも環境変数の利用を推奨。
+
+**説明:**
+
+* 設定キーとバリデーションを1つの `@ConfigurationProperties` Bean に集約することで、メンテナンスが容易になる。
+* 各所で `@Value("${...}")` を使うと、設定キー変更のたびに複数箇所を修正する必要がある。
+* Profiles を多用すると、複数プロファイルの組み合わせ順序により意図しない設定になる場合がある。
+
+---
+
+## 4. **明確なトランザクション境界を定義する**
+
+* Service 層メソッドごとに1つのトランザクション単位を定義する。
+* 読み取り専用メソッドには `@Transactional(readOnly = true)`。
+* データ変更を伴うメソッドには `@Transactional`。
+* トランザクション内の処理は最小限に保つ。
+
+**説明:**
+
+* **Unit of Work:** Use case単位でDB操作を1つの原子的な処理にまとめる。
+* **接続再利用:** `@Transactional` メソッドでは同一接続を使い続け、接続プールのオーバーヘッドを削減。
+* **パフォーマンス:** `readOnly = true` で不要なフラッシュを防ぎ、高速化。
+* **競合軽減:** トランザクションを短く保つことでロック競合を減らす。
+
+---
+
+## 5. **Open Session in View パターンを無効化する**
+
+* Spring Data JPA 使用時は、`spring.jpa.open-in-view=false` を設定する。
+
+**説明:**
+
+* OSIVを有効にすると View レンダリング時に Lazy ロードが走り、N+1問題を引き起こす。
+* 無効にすることで、必要な関連を fetch join や entity graph で明示的に取得し、`LazyInitializationException` を回避できる。
+
+---
+
+## 6. **Web層とPersistence層を分離する**
+
+* Entity を Controller のレスポンスとして直接返さない。
+* Request/Response 専用の DTO (record クラス) を定義する。
+* 入力検証は `Jakarta Validation` アノテーションで行う。
+
+**説明:**
+
+* Entity を直接公開すると、DBスキーマ変更がAPI仕様に影響する。
+* DTOを用いることで公開フィールドを明確に制御でき、安全性・可読性が向上。
+* Use-case ごとにDTOを設けると、柔軟なバリデーション設定が可能。
+* MapStruct などのコンパイル時マッピングライブラリを使用し、Reflectionによるオーバーヘッドを回避。
+
+---
+
+## 7. **REST API Design Principles に従う**
+
+* `/api/v{version}/resources` のようにバージョン付きでリソース指向のURLを構成する。
+* コレクション・サブリソースのURL命名を一貫させる（例: `/posts/{slug}/comments`）。
+* `ResponseEntity<T>` で明示的なHTTPステータスを返す。
+* 大量データは Pagination を使用する。
+* JSONは常にオブジェクト形式をトップレベルにし、拡張性を確保。
+* JSONプロパティ名は snake_case または camelCase に統一。
+
+**説明:**
+
+* 一貫性のあるREST設計により、クライアントが予測しやすく、ドキュメントに頼らずに利用できる。
+* 標準化されたURL構造とHTTPレスポンスで、信頼性の高いクライアント連携が可能。
+* 詳細は [Zalando RESTful API and Event Guidelines](https://opensource.zalando.com/restful-api-guidelines/) を参照。
+
+---
+
+## 8. **ビジネス操作には Command Object を使う**
+
+* 入力データをラップする専用の Command record（例: `CreateOrderCommand`）を定義し、Service メソッドに渡す。
+
+**説明:**
+
+* Use caseごとにCommandやQueryオブジェクトを作成することで、必要な入力項目が明確になる。
+* 呼び出し元がどの値を指定すべきか（キーや作成日を自動生成するかなど）を迷うことがなくなる。
+
+---
+
+## 9. **例外処理を集中化する**
+
+* `@ControllerAdvice` または `@RestControllerAdvice` クラスでグローバルハンドラを定義し、`@ExceptionHandler` メソッドで例外を処理する。
+* エラーレスポンスは一貫したフォーマットにし、`ProblemDetails`（[RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)）形式を推奨。
+
+**説明:**
+
+* 例外はキャッチして標準エラーレスポンスを返すべきで、スロー放置は避ける。
+* 各Controllerでtry/catchを書くより、`GlobalExceptionHandler` に集約した方がメンテナンス性が高い。
+
+---
+
+## 10. **Actuator の公開制御**
+
+* `/health`, `/info`, `/metrics` など最低限のエンドポイントのみ認証なしで公開。
+* その他は認証必須にする。
+
+**説明:**
+
+* これらのエンドポイントは監視ツール（Prometheusなど）からのヘルスチェックに必要。
+* 非本番環境（DEV, QA）では `/actuator/beans`, `/actuator/loggers` などを追加で有効化してもよい。
+
+---
+
+## 11. **ResourceBundle を使った国際化 (i18n)**
+
+* ラベルやメッセージなどユーザー向け文言はコードに直接書かず、ResourceBundleに外部化する。
+
+**説明:**
+
+* 文字列をコードに埋め込むと多言語対応が困難になる。
+* ResourceBundleを使えば、ロケールごとに別ファイルで翻訳を管理できる。
+* Springがユーザーロケールに応じて適切なBundleをロード可能。
+
+---
+
+## 12. **Integration Test では Testcontainers を使う**
+
+* 実際のサービス（DB, メッセージブローカなど）をDockerコンテナで起動してテストする。
+
+**説明:**
+
+* 本番と同じ種類の依存関係でテストすることで、環境差異を減らし信頼性を高める。
+* `latest` タグではなく、使用中の本番依存と同じバージョンのDockerイメージを指定する。
+
+---
+
+## 13. **Integration Test ではランダムポートを使用する**
+
+* 以下のように `@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)` を指定。
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+```
+
+**説明:**
+
+* CI/CD 環境では複数ビルドが同時実行されるため、固定ポートよりランダムポートを使用して競合を防ぐ。
+
+---
+
+## 14. **Logging**
+
+* `System.out.println()` は使用禁止。必ず SLF4J（Logback, Log4j2 など）を利用する。
+* 機密情報をログに出力しない。
+* 高コストなログメッセージ生成はガード節または Supplier/Lambda を使う。
+
+```java
+if (logger.isDebugEnabled()) {
+    logger.debug("Detailed state: {}", computeExpensiveDetails());
+}
+
+// Supplier/Lambda
+logger.atDebug()
+	.setMessage("Detailed state: {}")
+	.addArgument(() -> computeExpensiveDetails())
+    .log();
+```
+
+**説明:**
+
+* **柔軟なログ制御:** 環境ごとにログレベルを切り替え可能。
+* **リッチなメタデータ:** クラス名、スレッドIDなどを自動出力できる。
+* **多様な出力:** コンソール、ファイル、DB、リモート転送などに対応。
+* **分析しやすい構造化ログ:** ELKやLokiへの連携も容易。
