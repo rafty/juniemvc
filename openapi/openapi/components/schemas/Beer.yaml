@@ -1,0 +1,63 @@
+title: Beer
+summary: Beer resource used by the Beer API.
+description: |
+  Represents a Beer item exposed by the API. This schema mirrors the BeerDto used in the Web layer and includes
+  validation constraints and read-only properties as documented in the application code.
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+    description: Unique identifier of the beer (server generated).
+    readOnly: true
+    examples: [ 1 ]
+  version:
+    type: integer
+    format: int32
+    description: Version used for optimistic locking (server managed).
+    readOnly: true
+    examples: [ 3 ]
+  beerName:
+    type: string
+    description: Human-friendly beer name.
+    minLength: 1
+    examples: [ "Galaxy Cat IPA" ]
+  beerStyle:
+    type: string
+    description: Beer style name such as ALE, PALE ALE, IPA, STOUT, PILSNER, etc.
+    minLength: 1
+    examples: [ "IPA" ]
+  upc:
+    type: string
+    description: "Universal Product Code (UPC). Typically a 12-13 digit numeric code identifying the product."
+    minLength: 1
+    examples: [ "0123456789012" ]
+  quantityOnHand:
+    type: integer
+    format: int32
+    description: Available inventory quantity. Must not be negative.
+    minimum: 0
+    examples: [ 42 ]
+  price:
+    type: number
+    description: Unit price. Must be a positive value.
+    minimum: 0
+    exclusiveMinimum: 0
+    examples: [ 9.99 ]
+  createdDate:
+    type: string
+    format: date-time
+    description: When the beer record was created.
+    readOnly: true
+    examples: [ "2025-01-01T12:00:00Z" ]
+  updatedDate:
+    type: string
+    format: date-time
+    description: When the beer record was last updated.
+    readOnly: true
+    examples: [ "2025-01-02T08:30:00Z" ]
+required:
+  - beerName
+  - beerStyle
+  - upc
+  - price

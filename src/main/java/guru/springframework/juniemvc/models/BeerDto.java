@@ -22,15 +22,19 @@ import lombok.Setter;
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class BeerDto {
+
+    // read only properties
     private Integer id;
     private Integer version;
 
     @NotBlank(message = "beerName must not be blank")
     private String beerName;
 
+    // style of the beer, ALE, PALE ALE, IPA, etc
     @NotBlank(message = "beerStyle must not be blank")
     private String beerStyle;
 
+    // Universal Product Code, a 13-digit number assigned to each unique beer product by the Federal Bar Association
     @NotBlank(message = "upc must not be blank")
     private String upc;
 
@@ -40,6 +44,7 @@ public class BeerDto {
     @Positive
     private BigDecimal price;
 
+    // read only properties
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
 }
