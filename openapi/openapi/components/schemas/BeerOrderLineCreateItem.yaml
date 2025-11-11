@@ -1,0 +1,22 @@
+title: BeerOrderLineCreateItem
+summary: Create item for a single beer in the order.
+description: |
+  Represents one line of the beer order during creation. Contains the beer identifier
+  and the quantity requested. Mirrors the BeerOrderDtos.BeerOrderLineCreateItem record.
+type: object
+properties:
+  beerId:
+    type: integer
+    format: int32
+    description: ID of the beer to order. Must be a positive integer.
+    minimum: 1
+    examples: [ 1 ]
+  orderQuantity:
+    type: integer
+    format: int32
+    description: Quantity requested for this beer. Must be a positive integer.
+    minimum: 1
+    examples: [ 12 ]
+required:
+  - beerId
+  - orderQuantity

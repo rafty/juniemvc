@@ -1,0 +1,31 @@
+title: BeerOrderLineResponse
+summary: Response item for a single beer in the order.
+description: |
+  Represents one line of the beer order when returned by the API.
+  Mirrors the BeerOrderDtos.BeerOrderLineResponse record in the application code.
+type: object
+properties:
+  beerId:
+    type: integer
+    format: int32
+    description: ID of the beer for this line item.
+    examples: [ 1 ]
+  orderQuantity:
+    type: integer
+    format: int32
+    description: Quantity requested for this beer.
+    minimum: 1
+    examples: [ 12 ]
+  quantityAllocated:
+    type: integer
+    format: int32
+    description: Quantity allocated from inventory for this line. May be less than orderQuantity.
+    minimum: 0
+    examples: [ 12 ]
+  status:
+    $ref: './LineStatus.yaml'
+required:
+  - beerId
+  - orderQuantity
+  - quantityAllocated
+  - status

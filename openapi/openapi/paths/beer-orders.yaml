@@ -1,0 +1,59 @@
+post:
+  tags:
+    - BeerOrder
+  summary: Create a beer order
+  description: Create a new beer order and return the created resource.
+  operationId: createBeerOrder
+  security:
+    - api_key: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/BeerOrderCreateRequest.yaml
+        examples:
+          default:
+            value:
+              customerRef: PO-2025-000123
+              paymentAmount: 59.98
+              lines:
+                - beerId: 1
+                  orderQuantity: 12
+                - beerId: 2
+                  orderQuantity: 6
+  responses:
+    '201':
+      description: Beer order created
+      headers:
+        Location:
+          description: URL to the newly created resource
+          schema:
+            type: string
+            example: /api/v1/beer-orders/101
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/BeerOrderResponse.yaml
+          examples:
+            default:
+              value:
+                id: 101
+                version: 1
+                customerRef: PO-2025-000123
+                paymentAmount: 59.98
+                status: NEW
+                createdDate: 2025-11-11T10:15:30Z
+                updatedDate: 2025-11-11T10:15:30Z
+                lines:
+                  - beerId: 1
+                    orderQuantity: 12
+                    quantityAllocated: 12
+                    status: ALLOCATED
+                  - beerId: 2
+                    orderQuantity: 6
+                    quantityAllocated: 4
+                    status: BACKORDER
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml

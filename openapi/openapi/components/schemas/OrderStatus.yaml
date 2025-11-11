@@ -1,0 +1,16 @@
+title: OrderStatus
+summary: Status of the beer order lifecycle.
+description: |
+  Enumerates the lifecycle states of a beer order as used by the application.
+  Values correspond to the OrderStatus enum in the codebase.
+type: string
+enum:
+  - NEW
+  - VALIDATION_PENDING
+  - VALIDATED
+  - ALLOCATED
+  - PARTIALLY_ALLOCATED
+  - PICKED_UP
+  - DELIVERED
+  - CANCELED
+examples: [ "NEW" ]

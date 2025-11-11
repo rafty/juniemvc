@@ -1,0 +1,64 @@
+title: BeerOrderResponse
+summary: Response payload representing a beer order.
+description: |
+  Response DTO returned from BeerOrderController operations. Mirrors BeerOrderDtos.BeerOrderResponse.
+  Contains server-assigned identifiers, timestamps, and current status.
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+    description: Unique identifier of the beer order (server generated).
+    readOnly: true
+    examples: [ 101 ]
+  version:
+    type: integer
+    format: int32
+    description: Version used for optimistic locking (server managed).
+    readOnly: true
+    examples: [ 1 ]
+  customerRef:
+    type: string
+    description: Optional client reference associated with the order.
+    maxLength: 64
+    examples: [ "PO-2025-000123" ]
+  paymentAmount:
+    type: number
+    description: Total payment amount for the order.
+    minimum: 0
+    examples: [ 59.98 ]
+  status:
+    $ref: './OrderStatus.yaml'
+  createdDate:
+    type: string
+    format: date-time
+    description: When the order record was created.
+    readOnly: true
+    examples: [ "2025-11-01T10:15:30Z" ]
+  updatedDate:
+    type: string
+    format: date-time
+    description: When the order record was last updated.
+    readOnly: true
+    examples: [ "2025-11-01T11:00:00Z" ]
+  lines:
+    type: array
+    description: Order line items with allocation state.
+    items:
+      $ref: './BeerOrderLineResponse.yaml'
+    examples:
+      - beerId: 1
+        orderQuantity: 12
+        quantityAllocated: 12
+        status: ALLOCATED
+      - beerId: 2
+        orderQuantity: 6
+        quantityAllocated: 4
+        status: BACKORDER
+required:
+  - id
+  - version
+  - status
+  - createdDate
+  - updatedDate
+  - lines

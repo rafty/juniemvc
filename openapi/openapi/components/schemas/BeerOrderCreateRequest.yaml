@@ -1,0 +1,30 @@
+title: BeerOrderCreateRequest
+summary: Request payload to create a new beer order.
+description: |
+  DTO used to create a beer order. Mirrors BeerOrderDtos.BeerOrderCreateRequest.
+  Includes validation constraints reflected from Jakarta Validation annotations in the code.
+type: object
+properties:
+  customerRef:
+    type: string
+    description: Optional client-specified reference string for the order.
+    maxLength: 64
+    examples: [ "PO-2025-000123" ]
+  paymentAmount:
+    type: number
+    description: Total payment amount for the order. Must be positive or zero with up to 17 integer digits and 2 fractional digits.
+    minimum: 0
+    examples: [ 59.98 ]
+  lines:
+    type: array
+    description: Non-empty list of order line items to create.
+    minItems: 1
+    items:
+      $ref: './BeerOrderLineCreateItem.yaml'
+    examples:
+      - - beerId: 1
+          orderQuantity: 12
+        - beerId: 2
+          orderQuantity: 6
+required:
+  - lines

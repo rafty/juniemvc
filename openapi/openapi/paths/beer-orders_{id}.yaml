@@ -1,0 +1,48 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: Beer order identifier
+    schema:
+      type: integer
+      format: int32
+    examples:
+      default:
+        value: 101
+get:
+  tags:
+    - BeerOrder
+  summary: Get beer order by id
+  description: Retrieve a single beer order by its id.
+  operationId: getBeerOrderById
+  security:
+    - api_key: []
+  responses:
+    '200':
+      description: Beer order found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/BeerOrderResponse.yaml
+          examples:
+            default:
+              value:
+                id: 101
+                version: 1
+                customerRef: PO-2025-000123
+                paymentAmount: 59.98
+                status: ALLOCATED
+                createdDate: 2025-11-11T10:15:30Z
+                updatedDate: 2025-11-11T11:00:00Z
+                lines:
+                  - beerId: 1
+                    orderQuantity: 12
+                    quantityAllocated: 12
+                    status: ALLOCATED
+                  - beerId: 2
+                    orderQuantity: 6
+                    quantityAllocated: 4
+                    status: BACKORDER
+    '404':
+      description: Beer order not found
+      $ref: ../components/responses/Problem.yaml

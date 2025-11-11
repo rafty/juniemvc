@@ -1,0 +1,12 @@
+title: LineStatus
+summary: Allocation status of an individual order line.
+description: |
+  Enumerates the allocation/fulfillment status of a beer order line as used by the application.
+  Values correspond to the LineStatus enum in the codebase.
+type: string
+enum:
+  - NEW
+  - ALLOCATED
+  - BACKORDER
+  - CANCELED
+examples: [ "ALLOCATED" ]
