@@ -26,12 +26,14 @@ public class BeerOrder {
     @Version
     private Integer version;
 
+    // reference information from customer
     @Column(length = 64)
     private String customerRef;
 
     @Column(precision = 19, scale = 2)
     private BigDecimal paymentAmount;
 
+    // enum status of the order, NEW, PAID, CANCELLED, INPROCESS, COMPLETE.
     @Enumerated(EnumType.STRING)
     @Column(length = 40, nullable = false)
     private OrderStatus status = OrderStatus.NEW;

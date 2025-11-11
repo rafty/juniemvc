@@ -33,6 +33,7 @@ public class Beer {
     @Column(length = 100, nullable = false)
     private String beerName;
 
+    // style of the beer, ALE, PALE ALE, IPA, etc
     @Column(length = 40, nullable = false)
     private String beerStyle;
 
