@@ -1,0 +1,90 @@
+parameters:
+  - name: id
+    in: path
+    required: true
+    description: Beer identifier
+    schema:
+      type: integer
+      format: int32
+    examples:
+      default:
+        value: 1
+get:
+  tags:
+    - Beer
+  summary: Get beer by id
+  description: Retrieve a single beer by its id.
+  operationId: getBeerById
+  security:
+    - api_key: []
+  responses:
+    '200':
+      description: Beer found
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Beer.yaml
+          examples:
+            default:
+              value:
+                id: 1
+                version: 3
+                beerName: Galaxy Cat IPA
+                beerStyle: IPA
+                upc: "0123456789012"
+                quantityOnHand: 42
+                price: 9.99
+                createdDate: "2025-01-01T12:00:00Z"
+                updatedDate: "2025-01-02T08:30:00Z"
+    '404':
+      description: Beer not found
+      $ref: ../components/responses/Problem.yaml
+put:
+  tags:
+    - Beer
+  summary: Update beer by id
+  description: Update an existing beer. Returns the updated resource.
+  operationId: updateBeer
+  security:
+    - api_key: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/Beer.yaml
+        examples:
+          update:
+            value:
+              beerName: Galaxy Cat IPA Double
+              beerStyle: IPA
+              upc: "0123456789012"
+              quantityOnHand: 50
+              price: 11.99
+  responses:
+    '200':
+      description: Updated beer
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Beer.yaml
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml
+    '404':
+      description: Beer not found
+      $ref: ../components/responses/Problem.yaml
+delete:
+  tags:
+    - Beer
+  summary: Delete beer by id
+  description: Delete an existing beer.
+  operationId: deleteBeer
+  security:
+    - api_key: []
+  responses:
+    '204':
+      description: Deleted successfully (no content)
+    '404':
+      description: Beer not found
+      $ref: ../components/responses/Problem.yaml
