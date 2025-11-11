@@ -17,9 +17,8 @@ class BeerRepositoryTest {
     @Autowired
     BeerRepository beerRepository;
 
-    private Beer buildSampleBeer(Integer id) {
+    private Beer buildSampleBeer() {
         return Beer.builder()
-                .id(id)
                 .beerName("Test Lager")
                 .beerStyle("LAGER")
                 .upc("12345")
@@ -31,13 +30,13 @@ class BeerRepositoryTest {
     @Test
     @DisplayName("Create and Read Beer")
     void createAndRead() {
-        Beer saved = beerRepository.saveAndFlush(buildSampleBeer(1));
+        Beer saved = beerRepository.saveAndFlush(buildSampleBeer());
 
-        assertThat(saved.getId()).isEqualTo(1);
+        assertThat(saved.getId()).isNotNull();
         assertThat(saved.getCreatedDate()).isNotNull();
         assertThat(saved.getUpdatedDate()).isNotNull();
 
-        Optional<Beer> fetched = beerRepository.findById(1);
+        Optional<Beer> fetched = beerRepository.findById(saved.getId());
         assertThat(fetched).isPresent();
         assertThat(fetched.get().getBeerName()).isEqualTo("Test Lager");
     }
@@ -45,7 +44,7 @@ class BeerRepositoryTest {
     @Test
     @DisplayName("Update Beer and check version increment")
     void updateBeer() {
-        Beer saved = beerRepository.saveAndFlush(buildSampleBeer(2));
+        Beer saved = beerRepository.saveAndFlush(buildSampleBeer());
         Integer initialVersion = saved.getVersion();
 
         saved.setBeerName("Updated Lager");
@@ -63,12 +62,13 @@ class BeerRepositoryTest {
     @Test
     @DisplayName("Delete Beer")
     void deleteBeer() {
-        beerRepository.save(buildSampleBeer(3));
+        Beer saved = beerRepository.saveAndFlush(buildSampleBeer());
+        Integer savedId = saved.getId();
 
-        assertThat(beerRepository.findById(3)).isPresent();
+        assertThat(beerRepository.findById(savedId)).isPresent();
 
-        beerRepository.deleteById(3);
+        beerRepository.deleteById(savedId);
 
-        assertThat(beerRepository.findById(3)).isEmpty();
+        assertThat(beerRepository.findById(savedId)).isEmpty();
     }
 }
