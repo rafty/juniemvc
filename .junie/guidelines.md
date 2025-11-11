@@ -214,3 +214,35 @@ logger.atDebug()
 * **リッチなメタデータ:** クラス名、スレッドIDなどを自動出力できる。
 * **多様な出力:** コンソール、ファイル、DB、リモート転送などに対応。
 * **分析しやすい構造化ログ:** ELKやLokiへの連携も容易。
+
+---
+
+## 15. **Flyway によるDBマイグレーション**
+
+* Spring Boot は `spring-boot-starter-data-jpa` や `spring-boot-starter-jdbc` と併用すると、アプリ起動時に Flyway を自動実行する（`spring.flyway.enabled=true` が既定、依存を追加すれば有効）。
+* デフォルトのスクリプト配置場所（クラスパス）
+  - `db/migration`（推奨の共通ディレクトリ）
+  - ベンダー別に分ける場合: `db/migration/{vendor}`（例: `db/migration/postgresql`、`db/migration/mysql`）
+  - 一般的なプロジェクト構成例:
+    - 本番用: `src/main/resources/db/migration`
+    - テスト用: `src/test/resources/db/migration`
+* バージョン命名規則（Versioned Migrations）
+  - ファイル名: `V<version>__<description>.sql`
+  - `<version>` は数値を `.` または `_` で区切る（例: `1`, `1.1`, `2_0_3`）
+  - 例: `V1__init_schema.sql`, `V1_1__add_beer_table.sql`, `V2__add_indexes.sql`
+* 繰り返しマイグレーション（Repeatable Migrations）
+  - ファイル名: `R__<description>.sql`
+  - 内容が変わるたびに再実行される（チェックサムで判定）
+  - 例: `R__refresh_views.sql`, `R__seed_reference_data.sql`
+* Java ベースのマイグレーション
+  - クラスパス上のパッケージ `db.migration`（デフォルト）に `V1__*.java` などを配置可能
+  - 例: `package db.migration; public class V3__BackfillData implements JavaMigration { ... }`
+* よく使う設定（`application.properties`）
+  - `spring.flyway.locations=classpath:db/migration`（複数指定可）
+  - `spring.flyway.baseline-on-migrate=true`（既存DBへ導入時のベースライン）
+  - `spring.flyway.clean-disabled=true`（安全のため本番は必ず無効化）
+  - `spring.flyway.schemas=public`（必要に応じてスキーマ指定）
+* 運用上の注意
+  - マイグレーションは一方向（不可逆）を基本とし、後戻りを想定しない
+  - 1コミット=1マイグレーションを心がけ、スキーマ変更とアプリ変更の整合性を保つ
+  - 長時間ロックが発生するDDLはメンテ時間帯や段階適用（オンラインDDL対応）を検討する
