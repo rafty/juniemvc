@@ -5,13 +5,20 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@DataJpaTest
+@org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest(excludeAutoConfiguration = {org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration.class})
+@org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase(replace = org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.ANY)
+@org.springframework.test.context.TestPropertySource(properties = {
+        "spring.flyway.enabled=false",
+        "spring.jpa.hibernate.ddl-auto=create-drop"
+})
 class BeerRepositoryTest {
 
     @Autowired
@@ -70,5 +77,48 @@ class BeerRepositoryTest {
         beerRepository.deleteById(savedId);
 
         assertThat(beerRepository.findById(savedId)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("findAll(Pageable) returns a page of beers")
+    void findAllPaged() {
+        // seed some data
+        for (int i = 0; i < 5; i++) {
+            beerRepository.save(Beer.builder()
+                    .beerName("Beer " + i)
+                    .beerStyle("STYLE")
+                    .upc("UPC-" + i)
+                    .quantityOnHand(10 + i)
+                    .price(new BigDecimal("3.50"))
+                    .build());
+        }
+        beerRepository.flush();
+
+        Page<Beer> page = beerRepository.findAll(PageRequest.of(0, 2));
+        assertThat(page.getContent()).hasSize(2);
+        assertThat(page.getTotalElements()).isGreaterThanOrEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("findByBeerNameContainingIgnoreCase(filter, Pageable) returns filtered page")
+    void findByBeerNameFilteredPaged() {
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Galaxy Cat IPA")
+                .beerStyle("IPA")
+                .upc("11111")
+                .quantityOnHand(10)
+                .price(new BigDecimal("5.00"))
+                .build());
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Porter House")
+                .beerStyle("STOUT")
+                .upc("22222")
+                .quantityOnHand(8)
+                .price(new BigDecimal("6.00"))
+                .build());
+
+        Page<Beer> page = beerRepository.findByBeerNameContainingIgnoreCase("porter", PageRequest.of(0, 10));
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getBeerName()).containsIgnoringCase("porter");
     }
 }

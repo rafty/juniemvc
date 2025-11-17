@@ -1,9 +1,9 @@
 package guru.springframework.juniemvc.services;
 
 import guru.springframework.juniemvc.models.BeerDto;
-
-import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface BeerService {
 
@@ -11,7 +11,7 @@ public interface BeerService {
 
     Optional<BeerDto> getById(Integer id);
 
-    List<BeerDto> listAll();
+    Page<BeerDto> list(Pageable pageable, String beerName);
 
     Optional<BeerDto> update(Integer id, BeerDto beerDto);
 

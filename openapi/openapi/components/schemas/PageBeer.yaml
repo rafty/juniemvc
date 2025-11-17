@@ -1,0 +1,56 @@
+type: object
+description: Spring Data Page wrapper for Beer list results
+properties:
+  content:
+    type: array
+    items:
+      $ref: ./Beer.yaml
+  pageable:
+    type: object
+    description: Pageable information
+    properties:
+      pageNumber:
+        type: integer
+        minimum: 0
+      pageSize:
+        type: integer
+        minimum: 1
+      sort:
+        type: object
+        properties:
+          sorted:
+            type: boolean
+          unsorted:
+            type: boolean
+          empty:
+            type: boolean
+  totalElements:
+    type: integer
+    format: int64
+  totalPages:
+    type: integer
+  last:
+    type: boolean
+  size:
+    type: integer
+  number:
+    type: integer
+  sort:
+    type: object
+    properties:
+      sorted:
+        type: boolean
+      unsorted:
+        type: boolean
+      empty:
+        type: boolean
+  numberOfElements:
+    type: integer
+  first:
+    type: boolean
+  empty:
+    type: boolean
+required:
+  - content
+  - totalElements
+  - totalPages
