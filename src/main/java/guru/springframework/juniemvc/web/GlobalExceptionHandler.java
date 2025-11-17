@@ -3,6 +3,7 @@ package guru.springframework.juniemvc.web;
 import guru.springframework.juniemvc.exceptions.BeerNotFoundException;
 import guru.springframework.juniemvc.exceptions.CustomerNotFoundException;
 import guru.springframework.juniemvc.exceptions.InvalidOrderException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.validation.FieldError;
@@ -38,6 +39,14 @@ class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, ex.getMessage());
         pd.setTitle("Invalid Order");
         pd.setType(URI.create("https://httpstatuses.com/400"));
+        return pd;
+    }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    ProblemDetail handleEntityNotFound(EntityNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        pd.setTitle("Resource Not Found");
+        pd.setType(URI.create("https://httpstatuses.com/404"));
         return pd;
     }
 

@@ -1,0 +1,83 @@
+get:
+  summary: Get a shipment by id for a beer order
+  tags:
+    - BeerOrder
+  operationId: getBeerOrderShipmentById
+  parameters:
+    - name: beerOrderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/BeerOrderShipmentResponse.yaml
+    '404':
+      $ref: ../components/responses/Problem.yaml
+put:
+  summary: Update a shipment by id for a beer order
+  tags:
+    - BeerOrder
+  operationId: updateBeerOrderShipment
+  parameters:
+    - name: beerOrderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/BeerOrderShipmentRequest.yaml
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/BeerOrderShipmentResponse.yaml
+    '400':
+      $ref: ../components/responses/Problem.yaml
+delete:
+  summary: Delete a shipment by id for a beer order
+  tags:
+    - BeerOrder
+  operationId: deleteBeerOrderShipment
+  parameters:
+    - name: beerOrderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '204':
+      description: No Content
+    '404':
+      $ref: ../components/responses/Problem.yaml
