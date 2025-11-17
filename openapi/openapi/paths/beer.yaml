@@ -2,13 +2,40 @@ get:
   tags:
     - Beer
   summary: List beers
-  description: Retrieve all beers.
+  description: Retrieve beers with pagination and optional filtering by beerName.
   operationId: listBeers
   security:
     - api_key: []
+  parameters:
+    - name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 0
+      description: Zero-based page index (0..N)
+    - name: size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+      description: The size of the page to be returned
+    - name: sort
+      in: query
+      required: false
+      schema:
+        type: string
+      description: "Sorting criteria in the format: property(,asc|desc). Multiple sort params allowed."
+    - name: beerName
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Optional filter to match beerName (contains, case-insensitive)
   responses:
     '200':
-      description: A list of beers
+      description: A page of beers
       headers:
         Content-Type:
           schema:
@@ -17,30 +44,36 @@ get:
       content:
         application/json:
           schema:
-            type: array
-            items:
-              $ref: ../components/schemas/Beer.yaml
+            $ref: ../components/schemas/PageBeer.yaml
           examples:
             default:
               value:
-                - id: 1
-                  version: 1
-                  beerName: Galaxy Cat IPA
-                  beerStyle: IPA
-                  upc: "0123456789012"
-                  quantityOnHand: 42
-                  price: 9.99
-                  createdDate: "2025-01-01T12:00:00Z"
-                  updatedDate: "2025-01-01T12:00:00Z"
-                - id: 2
-                  version: 1
-                  beerName: Porter House
-                  beerStyle: STOUT
-                  upc: "0001112223334"
-                  quantityOnHand: 10
-                  price: 5.50
-                  createdDate: "2025-01-01T12:00:00Z"
-                  updatedDate: "2025-01-01T12:00:00Z"
+                content:
+                  - id: 1
+                    version: 1
+                    beerName: Galaxy Cat IPA
+                    beerStyle: IPA
+                    upc: "0123456789012"
+                    quantityOnHand: 42
+                    price: 9.99
+                    createdDate: "2025-01-01T12:00:00Z"
+                    updatedDate: "2025-01-01T12:00:00Z"
+                  - id: 2
+                    version: 1
+                    beerName: Porter House
+                    beerStyle: STOUT
+                    upc: "0001112223334"
+                    quantityOnHand: 10
+                    price: 5.50
+                    createdDate: "2025-01-01T12:00:00Z"
+                    updatedDate: "2025-01-01T12:00:00Z"
+                totalElements: 2
+                totalPages: 1
+                size: 20
+                number: 0
+                numberOfElements: 2
+                first: true
+                last: true
     '400':
       description: Invalid request
       $ref: ../components/responses/Problem.yaml

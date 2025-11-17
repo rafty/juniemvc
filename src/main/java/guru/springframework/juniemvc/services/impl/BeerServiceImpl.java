@@ -5,11 +5,11 @@ import guru.springframework.juniemvc.mappers.BeerMapper;
 import guru.springframework.juniemvc.models.BeerDto;
 import guru.springframework.juniemvc.repositories.BeerRepository;
 import guru.springframework.juniemvc.services.BeerService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class BeerServiceImpl implements BeerService {
@@ -35,10 +35,11 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public List<BeerDto> listAll() {
-        return beerRepository.findAll().stream()
-                .map(beerMapper::toDto)
-                .collect(Collectors.toList());
+    public Page<BeerDto> list(Pageable pageable, String beerName) {
+        Page<Beer> page = (beerName == null || beerName.isBlank())
+                ? beerRepository.findAll(pageable)
+                : beerRepository.findByBeerNameContainingIgnoreCase(beerName, pageable);
+        return page.map(beerMapper::toDto);
     }
 
     @Override

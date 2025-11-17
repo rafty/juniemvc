@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/beer")
@@ -34,8 +33,10 @@ class BeerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BeerDto>> listAll() {
-        return ResponseEntity.ok(beerService.listAll());
+    public ResponseEntity<org.springframework.data.domain.Page<BeerDto>> list(
+            org.springframework.data.domain.Pageable pageable,
+            @RequestParam(value = "beerName", required = false) String beerName) {
+        return ResponseEntity.ok(beerService.list(pageable, beerName));
     }
 
     @PutMapping("/{id}")

@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 class BeerServiceTest {
@@ -99,18 +100,41 @@ class BeerServiceTest {
     }
 
     @Test
-    @DisplayName("listAll() should map entities to DTOs")
-    void listAll() {
-        List<Beer> list = Arrays.asList(sampleBeer(1), sampleBeer(2));
-        when(beerRepository.findAll()).thenReturn(list);
+    @DisplayName("list(pageable, null) should use findAll(pageable) and map page of DTOs")
+    void listPagedNoFilter() {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 2);
+        List<Beer> entities = Arrays.asList(sampleBeer(1), sampleBeer(2));
+        org.springframework.data.domain.Page<Beer> entityPage = new org.springframework.data.domain.PageImpl<>(entities, pageable, 2);
+
+        when(beerRepository.findAll(eq(pageable))).thenReturn(entityPage);
         when(beerMapper.toDto(any(Beer.class)))
                 .thenReturn(sampleDto(1))
                 .thenReturn(sampleDto(2));
 
-        List<BeerDto> result = beerService.listAll();
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, null);
 
-        assertThat(result).hasSize(2);
-        assertThat(result.get(0).getId()).isEqualTo(1);
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent().get(0).getId()).isEqualTo(1);
+        verify(beerRepository, times(1)).findAll(eq(pageable));
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("list(pageable, beerName) should use filter method and map page of DTOs")
+    void listPagedWithFilter() {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        List<Beer> entities = Arrays.asList(sampleBeer(1));
+        org.springframework.data.domain.Page<Beer> entityPage = new org.springframework.data.domain.PageImpl<>(entities, pageable, 1);
+
+        when(beerRepository.findByBeerNameContainingIgnoreCase(eq("Lager"), eq(pageable))).thenReturn(entityPage);
+        when(beerMapper.toDto(any(Beer.class))).thenReturn(sampleDto(1));
+
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, "Lager");
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Lager");
+        verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCase(eq("Lager"), eq(pageable));
+        verify(beerRepository, never()).findAll(any(org.springframework.data.domain.Pageable.class));
     }
 
     @Test

@@ -93,16 +93,39 @@ class BeerControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/v1/beer - list all")
-    void listAll() throws Exception {
+    @DisplayName("GET /api/v1/beer - list paged, no filter")
+    void listPagedNoFilter() throws Exception {
         List<BeerDto> beers = Arrays.asList(sampleBeer(1), sampleBeer(2));
-        Mockito.when(beerService.listAll()).thenReturn(beers);
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 2);
+        org.springframework.data.domain.Page<BeerDto> page = new org.springframework.data.domain.PageImpl<>(beers, pageable, 2);
+        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq((String) null)))
+                .thenReturn(page);
 
-        mockMvc.perform(get("/api/v1/beer"))
+        mockMvc.perform(get("/api/v1/beer")
+                        .param("page", "0")
+                        .param("size", "2"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].id", is(1)))
-                .andExpect(jsonPath("$[1].id", is(2)));
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.content[0].id", is(1)))
+                .andExpect(jsonPath("$.content[1].id", is(2)));
+    }
+
+    @Test
+    @DisplayName("GET /api/v1/beer - list paged, with beerName filter")
+    void listPagedWithFilter() throws Exception {
+        List<BeerDto> beers = Arrays.asList(sampleBeer(1));
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
+        org.springframework.data.domain.Page<BeerDto> page = new org.springframework.data.domain.PageImpl<>(beers, pageable, 1);
+        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq("Lager")))
+                .thenReturn(page);
+
+        mockMvc.perform(get("/api/v1/beer")
+                        .param("page", "0")
+                        .param("size", "5")
+                        .param("beerName", "Lager"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].beerName", containsString("Lager")));
     }
 
     @Test
