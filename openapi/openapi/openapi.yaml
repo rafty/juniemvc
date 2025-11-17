@@ -61,6 +61,9 @@ servers:
         default: www
         description: Your tenant id
   - url: https://example.com/api/v1
+security:
+  - api_key: []
+  - basic_auth: []
 paths:
   '/api/v1/beer':
     $ref: 'paths/beer.yaml'
@@ -74,6 +77,10 @@ paths:
     $ref: 'paths/customers.yaml'
   '/api/v1/customers/{id}':
     $ref: 'paths/customers_{id}.yaml'
+  '/api/v1/beer-orders/{beerOrderId}/shipments':
+    $ref: 'paths/beer-orders_{beerOrderId}_shipments.yaml'
+  '/api/v1/beer-orders/{beerOrderId}/shipments/{id}':
+    $ref: 'paths/beer-orders_{beerOrderId}_shipments_{id}.yaml'
 components:
   securitySchemes:
     main_auth:

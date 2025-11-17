@@ -1,0 +1,15 @@
+type: object
+properties:
+  id:
+    type: integer
+    format: int32
+  shipmentDate:
+    type: string
+    format: date
+  carrier:
+    type: string
+  trackingNumber:
+    type: string
+required:
+  - id
+  - shipmentDate

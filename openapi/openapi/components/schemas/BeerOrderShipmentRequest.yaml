@@ -1,0 +1,11 @@
+type: object
+properties:
+  shipmentDate:
+    type: string
+    format: date
+  carrier:
+    type: string
+  trackingNumber:
+    type: string
+required:
+  - shipmentDate

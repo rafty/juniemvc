@@ -1,0 +1,78 @@
+post:
+  summary: Create a shipment for a beer order
+  tags:
+    - BeerOrder
+  operationId: createBeerOrderShipment
+  parameters:
+    - name: beerOrderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/BeerOrderShipmentRequest.yaml
+  responses:
+    '201':
+      description: Created
+      headers:
+        Location:
+          description: Location of the created resource
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/BeerOrderShipmentResponse.yaml
+    '400':
+      $ref: ../components/responses/Problem.yaml
+get:
+  summary: List shipments for a beer order
+  tags:
+    - BeerOrder
+  operationId: listBeerOrderShipments
+  parameters:
+    - name: beerOrderId
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int32
+    - name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 0
+        default: 0
+    - name: size
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 20
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: ../components/schemas/BeerOrderShipmentResponse.yaml
+              totalElements:
+                type: integer
+              totalPages:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '400':
+      $ref: ../components/responses/Problem.yaml
