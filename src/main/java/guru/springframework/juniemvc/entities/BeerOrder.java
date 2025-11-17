@@ -45,6 +45,10 @@ public class BeerOrder {
     @UpdateTimestamp
     private LocalDateTime updatedDate;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
     @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @Builder.Default
     private List<BeerOrderLine> lines = new ArrayList<>();
