@@ -51,7 +51,6 @@ class CustomerServiceImpl implements CustomerService {
     public Optional<CustomerResponse> update(Integer id, CustomerUpdateRequest cmd) {
         return customerRepository.findById(id).map(existing -> {
             customerMapper.updateEntity(existing, cmd);
-            existing.setId(id);
             Customer saved = customerRepository.save(existing);
             return customerMapper.toResponse(saved);
         });

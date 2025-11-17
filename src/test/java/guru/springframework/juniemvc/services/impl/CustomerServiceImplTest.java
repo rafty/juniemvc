@@ -73,6 +73,7 @@ class CustomerServiceImplTest {
     @Test
     void update_whenFound_updatesAndSaves() {
         Customer existing = new Customer();
+        existing.setId(5); // mimic JPA-managed entity loaded with ID 5
         when(repository.findById(5)).thenReturn(Optional.of(existing));
         Customer saved = new Customer(); saved.setId(5);
         when(repository.save(existing)).thenReturn(saved);
