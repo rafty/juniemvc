@@ -1,6 +1,7 @@
 package guru.springframework.juniemvc.web;
 
 import guru.springframework.juniemvc.exceptions.BeerNotFoundException;
+import guru.springframework.juniemvc.exceptions.CustomerNotFoundException;
 import guru.springframework.juniemvc.exceptions.InvalidOrderException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -20,6 +21,14 @@ class GlobalExceptionHandler {
     ProblemDetail handleBeerNotFound(BeerNotFoundException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
         pd.setTitle("Beer Not Found");
+        pd.setType(URI.create("https://httpstatuses.com/404"));
+        return pd;
+    }
+
+    @ExceptionHandler(CustomerNotFoundException.class)
+    ProblemDetail handleCustomerNotFound(CustomerNotFoundException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
+        pd.setTitle("Customer Not Found");
         pd.setType(URI.create("https://httpstatuses.com/404"));
         return pd;
     }

@@ -1,0 +1,77 @@
+get:
+  tags:
+    - Customer
+  summary: Get customer by id
+  operationId: getCustomerById
+  security:
+    - api_key: []
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '200':
+      description: Customer
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CustomerResponse.yaml
+    '404':
+      description: Not found
+      $ref: ../components/responses/Problem.yaml
+put:
+  tags:
+    - Customer
+  summary: Update customer by id
+  operationId: updateCustomer
+  security:
+    - api_key: []
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CustomerUpdateRequest.yaml
+  responses:
+    '200':
+      description: Updated customer
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CustomerResponse.yaml
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml
+    '404':
+      description: Not found
+      $ref: ../components/responses/Problem.yaml
+delete:
+  tags:
+    - Customer
+  summary: Delete customer by id
+  operationId: deleteCustomer
+  security:
+    - api_key: []
+  parameters:
+    - in: path
+      name: id
+      required: true
+      schema:
+        type: integer
+        format: int32
+  responses:
+    '204':
+      description: No content
+    '404':
+      description: Not found
+      $ref: ../components/responses/Problem.yaml

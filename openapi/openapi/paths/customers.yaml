@@ -1,0 +1,78 @@
+post:
+  tags:
+    - Customer
+  summary: Create a customer
+  operationId: createCustomer
+  security:
+    - api_key: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/CustomerCreateRequest.yaml
+  responses:
+    '201':
+      description: Customer created
+      headers:
+        Location:
+          description: URL to the newly created resource
+          schema:
+            type: string
+          example: /api/v1/customers/101
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/CustomerResponse.yaml
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml
+get:
+  tags:
+    - Customer
+  summary: List customers (paged)
+  operationId: listCustomers
+  security:
+    - api_key: []
+  parameters:
+    - in: query
+      name: page
+      schema:
+        type: integer
+        minimum: 0
+      description: Page number (0-based)
+    - in: query
+      name: size
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 200
+      description: Page size
+    - in: query
+      name: sort
+      schema:
+        type: string
+      description: Sort, e.g., name,asc
+  responses:
+    '200':
+      description: Paged list of customers
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              content:
+                type: array
+                items:
+                  $ref: ../components/schemas/CustomerResponse.yaml
+              totalElements:
+                type: integer
+              totalPages:
+                type: integer
+              size:
+                type: integer
+              number:
+                type: integer
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml
