@@ -35,8 +35,9 @@ class BeerController {
     @GetMapping
     public ResponseEntity<org.springframework.data.domain.Page<BeerDto>> list(
             org.springframework.data.domain.Pageable pageable,
-            @RequestParam(value = "beerName", required = false) String beerName) {
-        return ResponseEntity.ok(beerService.list(pageable, beerName));
+            @RequestParam(value = "beerName", required = false) String beerName,
+            @RequestParam(value = "beerStyle", required = false) String beerStyle) {
+        return ResponseEntity.ok(beerService.list(pageable, beerName, beerStyle));
     }
 
     @PutMapping("/{id}")

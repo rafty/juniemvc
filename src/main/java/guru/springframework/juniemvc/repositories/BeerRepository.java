@@ -10,4 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface BeerRepository extends JpaRepository<Beer, Integer> {
 
     Page<Beer> findByBeerNameContainingIgnoreCase(String beerName, Pageable pageable);
+
+    Page<Beer> findByBeerStyleIgnoreCase(String beerStyle, Pageable pageable);
+
+    Page<Beer> findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(String beerName, String beerStyle, Pageable pageable);
 }
