@@ -1,4 +1,4 @@
--- Flyway V2: Add beer_order_shipment table
+-- Flyway V5: Add beer_order_shipment table (renamed from V2 to avoid duplicate version)
 -- H2-compatible DDL
 
 CREATE TABLE IF NOT EXISTS beer_order_shipment (

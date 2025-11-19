@@ -44,6 +44,9 @@ public class BeerDto {
     @Positive
     private BigDecimal price;
 
+    // Optional human-readable description of the beer
+    private String description;
+
     // read only properties
     private LocalDateTime createdDate;
     private LocalDateTime updatedDate;
