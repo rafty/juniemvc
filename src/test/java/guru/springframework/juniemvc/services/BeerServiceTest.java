@@ -3,6 +3,7 @@ package guru.springframework.juniemvc.services;
 import guru.springframework.juniemvc.entities.Beer;
 import guru.springframework.juniemvc.mappers.BeerMapper;
 import guru.springframework.juniemvc.models.BeerDto;
+import guru.springframework.juniemvc.models.BeerPatchDto;
 import guru.springframework.juniemvc.repositories.BeerRepository;
 import guru.springframework.juniemvc.services.impl.BeerServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -235,5 +236,40 @@ class BeerServiceTest {
         verify(beerRepository, never()).findAll(any(org.springframework.data.domain.Pageable.class));
         verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(anyString(), any());
         verify(beerRepository, never()).findByBeerStyleIgnoreCase(anyString(), any());
+    }
+
+    @Test
+    @DisplayName("patch() should update only provided fields and return DTO when found")
+    void patchFound() {
+        Beer existing = sampleBeer(6);
+        BeerPatchDto patch = BeerPatchDto.builder().beerName("Patched").price(new BigDecimal("12.34")).build();
+        Beer saved = sampleBeer(6);
+        saved.setBeerName("Patched");
+        saved.setPrice(new BigDecimal("12.34"));
+        BeerDto savedDto = sampleDto(6);
+        savedDto.setBeerName("Patched");
+        savedDto.setPrice(new BigDecimal("12.34"));
+
+        when(beerRepository.findById(eq(6))).thenReturn(Optional.of(existing));
+        doAnswer(invocation -> null).when(beerMapper).updateFromPatch(any(Beer.class), any(BeerPatchDto.class));
+        when(beerRepository.save(any(Beer.class))).thenReturn(saved);
+        when(beerMapper.toDto(any(Beer.class))).thenReturn(savedDto);
+
+        Optional<BeerDto> result = beerService.patch(6, patch);
+
+        assertThat(result).isPresent();
+        assertThat(result.get().getId()).isEqualTo(6);
+    }
+
+    @Test
+    @DisplayName("patch() should return empty when entity not found")
+    void patchNotFound() {
+        BeerPatchDto patch = BeerPatchDto.builder().beerName("X").build();
+        when(beerRepository.findById(eq(77))).thenReturn(Optional.empty());
+
+        Optional<BeerDto> result = beerService.patch(77, patch);
+
+        assertThat(result).isEmpty();
+        verify(beerRepository, never()).save(any());
     }
 }

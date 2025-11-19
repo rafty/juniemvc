@@ -2,6 +2,7 @@ package guru.springframework.juniemvc.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import guru.springframework.juniemvc.models.BeerDto;
+import guru.springframework.juniemvc.models.BeerPatchDto;
 import guru.springframework.juniemvc.services.BeerService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -170,6 +171,34 @@ class BeerControllerTest {
         Mockito.when(beerService.delete(eq(404))).thenReturn(false);
 
         mockMvc.perform(delete("/api/v1/beer/404"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/beer/{id} - patch success")
+    void patchBeerSuccess() throws Exception {
+        BeerPatchDto patch = BeerPatchDto.builder().beerName("Patched Name").build();
+        BeerDto updated = sampleBeer(12);
+        updated.setBeerName("Patched Name");
+        Mockito.when(beerService.patch(eq(12), any(BeerPatchDto.class))).thenReturn(Optional.of(updated));
+
+        mockMvc.perform(patch("/api/v1/beer/12")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patch)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(12)))
+                .andExpect(jsonPath("$.beerName", is("Patched Name")));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/v1/beer/{id} - not found")
+    void patchBeerNotFound() throws Exception {
+        BeerPatchDto patch = BeerPatchDto.builder().beerName("X").build();
+        Mockito.when(beerService.patch(eq(999), any(BeerPatchDto.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/v1/beer/999")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(patch)))
                 .andExpect(status().isNotFound());
     }
 }
