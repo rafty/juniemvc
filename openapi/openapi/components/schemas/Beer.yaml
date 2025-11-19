@@ -44,6 +44,10 @@ properties:
     minimum: 0
     exclusiveMinimum: 0
     examples: [ 9.99 ]
+  description:
+    type: string
+    description: Optional human-readable description of the beer.
+    examples: [ "Crisp and refreshing with citrus notes" ]
   createdDate:
     type: string
     format: date-time

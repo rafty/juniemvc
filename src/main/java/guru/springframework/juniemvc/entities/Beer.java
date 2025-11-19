@@ -45,6 +45,9 @@ public class Beer {
     @Column(precision = 19, scale = 2, nullable = false)
     private BigDecimal price;
 
+    @Column(length = 255)
+    private String description;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdDate;
