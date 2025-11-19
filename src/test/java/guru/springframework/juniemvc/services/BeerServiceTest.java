@@ -111,12 +111,14 @@ class BeerServiceTest {
                 .thenReturn(sampleDto(1))
                 .thenReturn(sampleDto(2));
 
-        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, null);
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, null, null);
 
         assertThat(result.getContent()).hasSize(2);
         assertThat(result.getContent().get(0).getId()).isEqualTo(1);
         verify(beerRepository, times(1)).findAll(eq(pageable));
         verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(anyString(), any());
+        verify(beerRepository, never()).findByBeerStyleIgnoreCase(anyString(), any());
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(anyString(), anyString(), any());
     }
 
     @Test
@@ -129,12 +131,14 @@ class BeerServiceTest {
         when(beerRepository.findByBeerNameContainingIgnoreCase(eq("Lager"), eq(pageable))).thenReturn(entityPage);
         when(beerMapper.toDto(any(Beer.class))).thenReturn(sampleDto(1));
 
-        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, "Lager");
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, "Lager", null);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).getBeerName()).isEqualTo("Test Lager");
         verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCase(eq("Lager"), eq(pageable));
         verify(beerRepository, never()).findAll(any(org.springframework.data.domain.Pageable.class));
+        verify(beerRepository, never()).findByBeerStyleIgnoreCase(anyString(), any());
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(anyString(), anyString(), any());
     }
 
     @Test
@@ -193,5 +197,43 @@ class BeerServiceTest {
 
         assertThat(result).isFalse();
         verify(beerRepository, never()).deleteById(any());
+    }
+
+    @Test
+    @DisplayName("list(pageable, null, style) should use style filter only")
+    void listPagedWithStyleOnly() {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 3);
+        java.util.List<Beer> entities = java.util.Arrays.asList(sampleBeer(3));
+        org.springframework.data.domain.Page<Beer> entityPage = new org.springframework.data.domain.PageImpl<>(entities, pageable, 1);
+
+        when(beerRepository.findByBeerStyleIgnoreCase(eq("IPA"), eq(pageable))).thenReturn(entityPage);
+        when(beerMapper.toDto(any(Beer.class))).thenReturn(sampleDto(3));
+
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, null, "IPA");
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        verify(beerRepository, times(1)).findByBeerStyleIgnoreCase(eq("IPA"), eq(pageable));
+        verify(beerRepository, never()).findAll(any(org.springframework.data.domain.Pageable.class));
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(anyString(), any());
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(anyString(), anyString(), any());
+    }
+
+    @Test
+    @DisplayName("list(pageable, name, style) should use combined filter")
+    void listPagedWithBothFilters() {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(1, 5);
+        java.util.List<Beer> entities = java.util.Arrays.asList(sampleBeer(4));
+        org.springframework.data.domain.Page<Beer> entityPage = new org.springframework.data.domain.PageImpl<>(entities, pageable, 1);
+
+        when(beerRepository.findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(eq("Cat"), eq("LAGER"), eq(pageable))).thenReturn(entityPage);
+        when(beerMapper.toDto(any(Beer.class))).thenReturn(sampleDto(4));
+
+        org.springframework.data.domain.Page<BeerDto> result = beerService.list(pageable, "Cat", "LAGER");
+
+        assertThat(result.getTotalElements()).isEqualTo(1);
+        verify(beerRepository, times(1)).findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase(eq("Cat"), eq("LAGER"), eq(pageable));
+        verify(beerRepository, never()).findAll(any(org.springframework.data.domain.Pageable.class));
+        verify(beerRepository, never()).findByBeerNameContainingIgnoreCase(anyString(), any());
+        verify(beerRepository, never()).findByBeerStyleIgnoreCase(anyString(), any());
     }
 }

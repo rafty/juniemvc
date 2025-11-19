@@ -98,7 +98,7 @@ class BeerControllerTest {
         List<BeerDto> beers = Arrays.asList(sampleBeer(1), sampleBeer(2));
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 2);
         org.springframework.data.domain.Page<BeerDto> page = new org.springframework.data.domain.PageImpl<>(beers, pageable, 2);
-        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq((String) null)))
+        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq((String) null), eq((String) null)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/api/v1/beer")
@@ -116,7 +116,7 @@ class BeerControllerTest {
         List<BeerDto> beers = Arrays.asList(sampleBeer(1));
         org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(0, 5);
         org.springframework.data.domain.Page<BeerDto> page = new org.springframework.data.domain.PageImpl<>(beers, pageable, 1);
-        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq("Lager")))
+        Mockito.when(beerService.list(any(org.springframework.data.domain.Pageable.class), eq("Lager"), eq((String) null)))
                 .thenReturn(page);
 
         mockMvc.perform(get("/api/v1/beer")

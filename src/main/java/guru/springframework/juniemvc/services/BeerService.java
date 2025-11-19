@@ -11,7 +11,7 @@ public interface BeerService {
 
     Optional<BeerDto> getById(Integer id);
 
-    Page<BeerDto> list(Pageable pageable, String beerName);
+    Page<BeerDto> list(Pageable pageable, String beerName, String beerStyle);
 
     Optional<BeerDto> update(Integer id, BeerDto beerDto);
 

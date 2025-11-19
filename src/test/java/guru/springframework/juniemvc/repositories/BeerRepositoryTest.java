@@ -121,4 +121,51 @@ class BeerRepositoryTest {
         assertThat(page.getTotalElements()).isEqualTo(1);
         assertThat(page.getContent().get(0).getBeerName()).containsIgnoringCase("porter");
     }
+
+    @Test
+    @DisplayName("findByBeerStyleIgnoreCase(style, Pageable) returns style filtered page")
+    void findByBeerStyleFilteredPaged() {
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Crisp Pils")
+                .beerStyle("LAGER")
+                .upc("33333")
+                .quantityOnHand(12)
+                .price(new BigDecimal("4.00"))
+                .build());
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Juicy Hops")
+                .beerStyle("IPA")
+                .upc("44444")
+                .quantityOnHand(7)
+                .price(new BigDecimal("7.00"))
+                .build());
+
+        Page<Beer> page = beerRepository.findByBeerStyleIgnoreCase("IPA", PageRequest.of(0, 10));
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getBeerStyle()).isEqualToIgnoringCase("IPA");
+    }
+
+    @Test
+    @DisplayName("combined filter by name contains and style exact (ignore case)")
+    void findByNameAndStyleFilteredPaged() {
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Galaxy Cat IPA")
+                .beerStyle("IPA")
+                .upc("55555")
+                .quantityOnHand(9)
+                .price(new BigDecimal("5.75"))
+                .build());
+        beerRepository.saveAndFlush(Beer.builder()
+                .beerName("Galaxy Cat Stout")
+                .beerStyle("STOUT")
+                .upc("66666")
+                .quantityOnHand(9)
+                .price(new BigDecimal("5.75"))
+                .build());
+
+        Page<Beer> page = beerRepository.findByBeerNameContainingIgnoreCaseAndBeerStyleIgnoreCase("galaxy", "IPA", PageRequest.of(0, 10));
+        assertThat(page.getTotalElements()).isEqualTo(1);
+        assertThat(page.getContent().get(0).getBeerStyle()).isEqualToIgnoringCase("IPA");
+        assertThat(page.getContent().get(0).getBeerName()).containsIgnoringCase("galaxy");
+    }
 }
