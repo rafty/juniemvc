@@ -1,0 +1,28 @@
+title: BeerPatch
+summary: Partial update payload for Beer resource.
+description: |
+  Patch schema for Beer. All properties are optional. Only provided properties will be updated; missing properties are ignored.
+type: object
+properties:
+  beerName:
+    type: string
+    description: Human-friendly beer name.
+  beerStyle:
+    type: string
+    description: Beer style name such as ALE, PALE ALE, IPA, STOUT, PILSNER, etc.
+  upc:
+    type: string
+    description: "Universal Product Code (UPC). Typically a 12-13 digit numeric code identifying the product."
+  quantityOnHand:
+    type: integer
+    format: int32
+    description: Available inventory quantity.
+    minimum: 0
+  price:
+    type: number
+    description: Unit price. Must be a positive value.
+    minimum: 0
+    exclusiveMinimum: 0
+  description:
+    type: string
+    description: Optional human-readable description of the beer.

@@ -74,6 +74,39 @@ put:
     '404':
       description: Beer not found
       $ref: ../components/responses/Problem.yaml
+patch:
+  tags:
+    - Beer
+  summary: Patch beer by id
+  description: Partially update an existing beer. Only provided fields are updated.
+  operationId: patchBeer
+  security:
+    - api_key: []
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: ../components/schemas/BeerPatch.yaml
+        examples:
+          patchNameAndPrice:
+            value:
+              beerName: Galaxy Cat Updated
+              price: 10.49
+  responses:
+    '200':
+      description: Patched beer
+      content:
+        application/json:
+          schema:
+            $ref: ../components/schemas/Beer.yaml
+    '400':
+      description: Invalid input
+      $ref: ../components/responses/Problem.yaml
+    '404':
+      description: Beer not found
+      $ref: ../components/responses/Problem.yaml
+
 delete:
   tags:
     - Beer

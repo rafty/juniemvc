@@ -1,6 +1,7 @@
 package guru.springframework.juniemvc.controllers;
 
 import guru.springframework.juniemvc.models.BeerDto;
+import guru.springframework.juniemvc.models.BeerPatchDto;
 import guru.springframework.juniemvc.services.BeerService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -43,6 +44,13 @@ class BeerController {
     @PutMapping("/{id}")
     public ResponseEntity<BeerDto> update(@PathVariable Integer id, @Valid @RequestBody BeerDto beerDto) {
         return beerService.update(id, beerDto)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<BeerDto> patch(@PathVariable Integer id, @RequestBody BeerPatchDto beerPatchDto) {
+        return beerService.patch(id, beerPatchDto)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).build());
     }
